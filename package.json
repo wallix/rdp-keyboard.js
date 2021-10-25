@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "tap": "^15.0.10"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/tap"
+  },
+  "tap": {
+    "coverage-map": "map.js"
+  }
+}
