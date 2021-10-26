@@ -1,7 +1,7 @@
 # Test
 
-`./test.js`
+`./test.sh`
 
 # Coverage
 
-`./test.js --coverage`
+`./test.sh --coverage`
