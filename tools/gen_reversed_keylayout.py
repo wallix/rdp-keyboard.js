@@ -177,6 +177,7 @@ output = [
 
 for layout in layouts:
     normal_rkeymap = {}
+    normal_ksyms = set()
     # text character and action
     for mods,keymap in layout.keymaps.items():
         mod_flags = vk_mod_to_mod_flags(mods)
@@ -188,6 +189,7 @@ for layout in layouts:
             if key and not key.deadkeys:
                 if key.text:
                     map:dict = normal_rkeymap.setdefault((key.text, key.codepoint), {})
+                    normal_ksyms.add(key.text)
                     scancodes:list = map.setdefault(mod_flags, [])
                     scancodes.append(f'0x{key_to_scancode(key):x}, ')
 
@@ -217,29 +219,29 @@ for layout in layouts:
             if key and key.deadkeys:
                 value = key_to_scancode(key)
                 for dkey in key.deadkeys.values():
-                    if not dkey.deadkeys:
-                        map:tuple[dict,set] = rdeadkeymap.setdefault(dkey.text, (dict(), set()))
-                        map[0].setdefault(mod_flags, []).append(f'0x{value:x}, ')
-                        map[1].add(f"'{char_to_char_table.get(dkey.with_, dkey.with_)}', ")
-                    else:
-                        m0 = f'0x{value:x}, '
-                        m1 = f"'{char_to_char_table.get(dkey.with_, dkey.with_)}', "
+                    m0 = f'0x{value:x}, '
+                    m1 = f"'{char_to_char_table.get(dkey.with_, dkey.with_)}'"
+                    if dkey.deadkeys:
                         for dkey2 in dkey.deadkeys.values():
+                            # print('\n'.join(repr(x) for x in dkey.deadkeys.items()))
                             assert not dkey2.deadkeys
-                            map:tuple[dict,set,set] = rdeadkeymap2.setdefault(dkey2.text, (dict(), set(), set()))
-                            map[0].setdefault(mod_flags, []).append(m0)
-                            map[1].add(m1)
-                            map[2].add(f"'{char_to_char_table.get(dkey2.with_, dkey2.with_)}', ")
+                            if dkey2.text not in normal_ksyms:
+                                m2 = f"{m1}, '{char_to_char_table.get(dkey2.with_, dkey2.with_)}'"
+                                map:tuple[dict,set,set] = rdeadkeymap2.setdefault(dkey2.text, (dict(), m2))
+                                map[0].setdefault(mod_flags, []).append(m0)
+                    elif dkey.text not in normal_ksyms:
+                        map:tuple[dict,set] = rdeadkeymap.setdefault(dkey.text, (dict(), m1))
+                        map[0].setdefault(mod_flags, []).append(m0)
 
     # remove duplicate dead key
-    for k in rdeadkeymap2:
-        rdeadkeymap.pop(k, None)
+    for k in rdeadkeymap:
+        rdeadkeymap2.pop(k, None)
 
 
     output.append(f'{{\n  klid: 0x{layout.klid},\n  localeName: "{layout.locale_name}",\n  displayName: "{layout.display_name}",\n  ctrlRightIsOem8: {"true" if layout.has_right_ctrl_like_oem8 else "false"},\n  keymap: {{\n')
 
     for (text, codepoint), scancodes_by_mods in normal_rkeymap.items():
-        k = char_to_char_table.get(text) or (text if text.isprintable() else f'\\x{codepoint:02x}')
+        k = char_to_char_table.get(text) or (text if text.isprintable() else (f'\\x{codepoint:02x}' if codepoint <=0xff else f'\\u{codepoint:04x}'))
         output.append(f"    '{k}': {{ ")
         for mod_flags, rkeys in scancodes_by_mods.items():
             # output.append(f"      0x{mod_flags:x}: [{''.join(rkeys)}], \n")
@@ -256,15 +258,14 @@ for layout in layouts:
                     for mod_flags, scancodes in scancodes_by_mods.items()),
             len(accents)
         )
-    sortedrkey = lambda rkeys: ''.join(sorted(rkeys1))
 
-    for text, (scancodes_by_mods, rkeys1) in rdeadkeymap.items():
+    for text, (scancodes_by_mods, rkey) in rdeadkeymap.items():
         text = char_to_char_table.get(text, text)
-        output.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, [{sortedrkey(rkeys1)}]],\n")
+        output.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, {rkey}],\n")
 
-    for text, (scancodes_by_mods, rkeys1, rkeys2) in rdeadkeymap2.items():
+    for text, (scancodes_by_mods, rkeys) in rdeadkeymap2.items():
         text = char_to_char_table.get(text, text)
-        output.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, [{sortedrkey(rkeys1)}], [{sortedrkey(rkeys2)}]],\n")
+        output.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, {rkeys}],\n")
 
     output.append('  },\n  accents: [\n')
 

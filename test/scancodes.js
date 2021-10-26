@@ -4,10 +4,19 @@ const {
     ReversedKeymap, SyncFlags, KeyAcquire, KeyRelease, toHumanReadableMods,
 } = require("scancodes");
 
-// load fr keyboard
-const rkeymap = (() => {
-  for (const layout of require("reversed_layouts").layouts) {
+const layouts = require("reversed_layouts").layouts;
+
+const rkeymapFr = (() => {
+  for (const layout of layouts) {
       if (layout.localeName === "fr-FR") {
+          return new ReversedKeymap(layout);
+      }
+  }
+})();
+
+const rkeymapDoubleDeadKey = (() => {
+  for (const layout of layouts) {
+      if (layout.klid === 0x0001045c) {
           return new ReversedKeymap(layout);
       }
   }
@@ -50,532 +59,559 @@ const RightCtrlMod  = 1 << 10;
 
 test('toScancodesAndFlags()', t => {
     test('not character', t => {
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('unknown character for french keyboard <ß>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("ß", "KeyA", KeyAcquire), undefined);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ß", "KeyA", KeyAcquire), undefined);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("ß", "KeyA", KeyRelease), undefined);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ß", "KeyA", KeyRelease), undefined);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <b>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("b", "KeyB", KeyAcquire), [0x30]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("b", "KeyB", KeyAcquire), [0x30]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("b", "KeyB", KeyRelease), [0x8030]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("b", "KeyB", KeyRelease), [0x8030]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <Enter>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Enter", "Enter", KeyAcquire), [0x1C]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Enter", "Enter", KeyAcquire), [0x1C]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Enter", "Enter", KeyRelease), [0x801C]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Enter", "Enter", KeyRelease), [0x801C]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing Escape', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Escape", "Escape", KeyAcquire), [0x01]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Escape", "Escape", KeyAcquire), [0x01]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Escape", "Escape", KeyRelease), [0x8001]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Escape", "Escape", KeyRelease), [0x8001]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <A>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <A>; weird case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <A>; ShiftRight case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
-        t.hexEqual(rkeymap.getModFlags(), RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <A>; ShiftRight + ShiftLeft', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
-        t.hexEqual(rkeymap.getModFlags(), RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod | RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod | RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod | RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod | RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod | RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod | RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <a>; ShiftLeft, weird browser case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x802A, 0x10, 0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x802A, 0x10, 0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <a>; ShiftLeft, interlaced and weird browser case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x802A, 0x10, 0x2A]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x802A, 0x10, 0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <A>; Capslock case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <a>; Capslock case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x3a, 0x803a, 0x10, 0x3a, 0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x3a, 0x803a, 0x10, 0x3a, 0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <A>; Capslock & NumLock case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("NumLock", "NumLock", KeyAcquire), [0x45]);
-        t.hexEqual(rkeymap.getModFlags(), NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("NumLock", "NumLock", KeyAcquire), [0x45]);
+        t.hexEqual(rkeymapFr.getModFlags(), NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("NumLock", "NumLock", KeyRelease), [0x8045]);
-        t.hexEqual(rkeymap.getModFlags(), NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("NumLock", "NumLock", KeyRelease), [0x8045]);
+        t.hexEqual(rkeymapFr.getModFlags(), NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod | NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod | NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod | NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod | NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod | NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod | NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod | NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod | NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod | NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod | NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), CapsLockMod | NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), CapsLockMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("A", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod | NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
-        t.hexEqual(rkeymap.getModFlags(), NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
+        t.hexEqual(rkeymapFr.getModFlags(), NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
-        t.hexEqual(rkeymap.getModFlags(), NumLockMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyRelease), [0x803a]);
+        t.hexEqual(rkeymapFr.getModFlags(), NumLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("NumLock", "NumLock", KeyAcquire), [0x45]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("NumLock", "NumLock", KeyAcquire), [0x45]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("NumLock", "NumLock", KeyRelease), [0x8045]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("NumLock", "NumLock", KeyRelease), [0x8045]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <ô>; Deadkey case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Dead", "BracketLeft", KeyAcquire), undefined);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Dead", "BracketLeft", KeyAcquire), undefined);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Dead", "BracketLeft", KeyRelease), undefined);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Dead", "BracketLeft", KeyRelease), undefined);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         // we send the input
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("ô", "KeyO", KeyAcquire), [0x1a, 0x18]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ô", "KeyO", KeyAcquire), [0x1a, 0x18]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <Ctrl+A>; "Select All" case', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x10]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyAcquire), [0x10]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         // we send the input
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("a", "KeyQ", KeyRelease), [0x8010]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <Ctrl+Alt+AltGr>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
-
-
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Alt", "AltLeft", KeyAcquire), [0x38]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod | AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
-
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod | AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
-
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod | AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Alt", "AltLeft", KeyAcquire), [0x38]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
-
-
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
-        t.hexEqual(rkeymap.getModFlags(), AltMod | AltGrMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
-
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), AltMod | AltGrMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
-
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), AltMod | AltGrMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Alt", "AltLeft", KeyRelease), [0x8038]);
-        t.hexEqual(rkeymap.getModFlags(), AltGrMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), AltGrMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), AltGrMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
-
-
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Alt", "AltLeft", KeyAcquire), [0x38]);
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod | AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod | AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
-
-
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlRight", KeyAcquire), [0x11D]);
-        t.hexEqual(rkeymap.getModFlags(), RightCtrlMod | AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
-
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), RightCtrlMod | AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
-
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), RightCtrlMod | AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod | AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlRight", KeyRelease), [0x811D]);
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Alt", "AltLeft", KeyRelease), [0x8038]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymap.altGrIsCtrlAndAlt = false;
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymap.altGrIsCtrlAndAlt = true;
-        t.hexEqual(rkeymap.getModFlags(), AltMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Alt", "AltLeft", KeyRelease), [0x8038]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Alt", "AltLeft", KeyAcquire), [0x38]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlRight", KeyAcquire), [0x11D]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightCtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), RightCtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), RightCtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlRight", KeyRelease), [0x811D]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        rkeymapFr.altGrIsCtrlAndAlt = false;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        rkeymapFr.altGrIsCtrlAndAlt = true;
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Alt", "AltLeft", KeyRelease), [0x8038]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <Shift>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2a]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2a]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
-        t.hexEqual(rkeymap.getModFlags(), ShiftMod | RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod | RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
-        t.hexEqual(rkeymap.getModFlags(), RightShiftMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <OS>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("OS", "OSLeft", KeyAcquire), [0x15b]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("OS", "OSLeft", KeyAcquire), [0x15b]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("OS", "OSRight", KeyAcquire), [0x15c]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("OS", "OSRight", KeyAcquire), [0x15c]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("OS", "OSLeft", KeyRelease), [0x815b]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("OS", "OSLeft", KeyRelease), [0x815b]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("OS", "OSRight", KeyRelease), [0x815c]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("OS", "OSRight", KeyRelease), [0x815c]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing <Meta>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Meta", "MetaLeft", KeyAcquire), [0x15b]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Meta", "MetaLeft", KeyAcquire), [0x15b]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Meta", "MetaRight", KeyAcquire), [0x15c]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Meta", "MetaRight", KeyAcquire), [0x15c]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Meta", "MetaLeft", KeyRelease), [0x815b]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Meta", "MetaLeft", KeyRelease), [0x815b]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Meta", "MetaRight", KeyRelease), [0x815c]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Meta", "MetaRight", KeyRelease), [0x815c]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         t.end();
     });
 
-
     test('acquiring and releasing <Ctrl + Backspace>', t => {
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Backspace", "Backspace", KeyAcquire), [0x0e]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Backspace", "Backspace", KeyAcquire), [0x0e]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Backspace", "Backspace", KeyRelease), [0x800e]);
-        t.hexEqual(rkeymap.getModFlags(), CtrlMod);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Backspace", "Backspace", KeyRelease), [0x800e]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymap.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
-        t.hexEqual(rkeymap.getModFlags(), 0);
-        t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
+    test('acquiring and releasing double deak key <~>', t => {
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Dead", "KeyT", KeyAcquire), undefined);
+        t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
+        t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Dead", "KeyT", KeyRelease), undefined);
+        t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
+        t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Dead", "KeyL", KeyAcquire), undefined);
+        t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
+        t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Dead", "KeyL", KeyRelease), undefined);
+        t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
+        t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Ꮭ", "KeyQ", KeyAcquire), [0x14, 0x2a, 0x3a, 0x803a, 0x26, 0x802a, 0x3a, 0x803a, 0x1e]);
+        t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
+        t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Ꭰ", "KeyQ", KeyRelease), [0x801e]);
+        t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
+        t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
 
         t.end();
     });
@@ -584,7 +620,7 @@ test('toScancodesAndFlags()', t => {
 });
 
 test('Sync', t => {
-    rkeymap.sync(
+    rkeymapFr.sync(
         SyncFlags.ShiftLeft
       | SyncFlags.ShiftRight
       | SyncFlags.ControlLeft
@@ -596,7 +632,7 @@ test('Sync', t => {
       | SyncFlags.OSRight
       | SyncFlags.CapsLock
     );
-    t.hexEqual(rkeymap.getModFlags(), ShiftMod
+    t.hexEqual(rkeymapFr.getModFlags(), ShiftMod
                                     | CtrlMod
                                     | AltMod
                                     | AltGrMod
@@ -604,17 +640,17 @@ test('Sync', t => {
                                     | NumLockMod
                                     | RightShiftMod
                                     | RightCtrlMod);
-    t.hexEqual(rkeymap.getVirtualModFlags(), ShiftMod
+    t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod
                                            | AltGrMod
                                            | CapsLockMod);
 
-    rkeymap.sync(0);
-    t.hexEqual(rkeymap.getModFlags(), 0);
-    t.hexEqual(rkeymap.getVirtualModFlags(), 0);
+    rkeymapFr.sync(0);
+    t.hexEqual(rkeymapFr.getModFlags(), 0);
+    t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-    rkeymap.sync(SyncFlags.NumLock | SyncFlags.AltLeft | SyncFlags.ControlRight);
-    t.hexEqual(rkeymap.getModFlags(), AltMod | NumLockMod | RightCtrlMod);
-    t.hexEqual(rkeymap.getVirtualModFlags(), AltGrMod);
+    rkeymapFr.sync(SyncFlags.NumLock | SyncFlags.AltLeft | SyncFlags.ControlRight);
+    t.hexEqual(rkeymapFr.getModFlags(), AltMod | NumLockMod | RightCtrlMod);
+    t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
     t.end();
 });
