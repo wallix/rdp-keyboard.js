@@ -1,3 +1,9 @@
+# Install Dependencies
+
+```sh
+npm i
+```
+
 # Test
 
 ```sh

@@ -89,6 +89,26 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
+    test('acquiring and releasing <Shift+:> (/)', t => {
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("/", "Period", KeyAcquire), [0x34]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("/", "Period", KeyRelease), [0x8034]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802A]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
     test('acquiring and releasing <Enter>', t => {
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Enter", "Enter", KeyAcquire), [0x1C]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
