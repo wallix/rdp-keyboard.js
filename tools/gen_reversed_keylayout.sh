@@ -2,6 +2,8 @@
 
 # uncompress: tar --zstd -xf kbdlayout.info.zst
 
+set -e
+
 d="$(dirname "$0")"
 
 genfile() {

@@ -1,7 +1,10 @@
+"use strict";
+
 const {test, Test} = require('tap')
 
 const {
     ReversedKeymap, SyncFlags, KeyAcquire, KeyRelease, toHumanReadableMods,
+    scancodesForSynchronizedMods,
 } = require("scancodes");
 
 const layouts = require("reversed_layouts").layouts;
@@ -653,16 +656,16 @@ test('Sync', t => {
       | SyncFlags.CapsLock
     );
     t.hexEqual(rkeymapFr.getModFlags(), ShiftMod
-                                    | CtrlMod
-                                    | AltMod
-                                    | AltGrMod
-                                    | CapsLockMod
-                                    | NumLockMod
-                                    | RightShiftMod
-                                    | RightCtrlMod);
+                                      | CtrlMod
+                                      | AltMod
+                                      | AltGrMod
+                                      | CapsLockMod
+                                      | NumLockMod
+                                      | RightShiftMod
+                                      | RightCtrlMod);
     t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod
-                                           | AltGrMod
-                                           | CapsLockMod);
+                                             | AltGrMod
+                                             | CapsLockMod);
 
     rkeymapFr.sync(0);
     t.hexEqual(rkeymapFr.getModFlags(), 0);
@@ -671,6 +674,21 @@ test('Sync', t => {
     rkeymapFr.sync(SyncFlags.NumLock | SyncFlags.AltLeft | SyncFlags.ControlRight);
     t.hexEqual(rkeymapFr.getModFlags(), AltMod | NumLockMod | RightCtrlMod);
     t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+    t.end();
+});
+
+test('scancodesForSynchronizedMods()', t => {
+    t.same(scancodesForSynchronizedMods(SyncFlags.AltLeft | SyncFlags.ShiftRight), [
+        KeyRelease | 0x2A,
+        KeyAcquire | 0x36,
+        KeyRelease | 0x1D,
+        KeyRelease | 0x11D,
+        KeyAcquire | 0x38,
+        KeyRelease | 0x138,
+        KeyRelease | 0x15B,
+        KeyRelease | 0x15C,
+    ]);
 
     t.end();
 });
