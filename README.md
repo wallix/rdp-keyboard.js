@@ -14,6 +14,7 @@ npm i
 
 ```sh
 ./test.sh --coverage
+./test.sh --output-html
 ```
 
 # Uncompress kbdlayout.info.zst
