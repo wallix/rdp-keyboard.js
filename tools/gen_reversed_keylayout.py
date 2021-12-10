@@ -167,12 +167,13 @@ def key_to_scancode(key:Key) -> int:
 layouts:list[KeyLayout] = parse_argv()
 
 error_messages = []
-# output = ['// keymap: { text: { mod_flags: [scancodes...] } }\n']
+
+keymap_vars = {}
+accent_vars = {}
+dkeymap_vars = {}
+
 output = [
-    '// keymap: { text: { mod_flags: scancode } }\n',
-    '// deadkeys: { text: [ idxAccent, idxKeymap, idxKeymap ? ]\n',
-    '// accents: [ { mod_flags: scancode } ]\n',
-    'const layouts = [\n'
+    '  return [\n'
 ]
 
 for layout in layouts:
@@ -237,18 +238,24 @@ for layout in layouts:
     for k in rdeadkeymap:
         rdeadkeymap2.pop(k, None)
 
+    output.append(f'  {{\n    klid: 0x{layout.klid},\n    localeName: "{layout.locale_name}",\n    displayName: "{layout.display_name}",\n    ctrlRightIsOem8: {"true" if layout.has_right_ctrl_like_oem8 else "false"},\n    keymap: ')
 
-    output.append(f'{{\n  klid: 0x{layout.klid},\n  localeName: "{layout.locale_name}",\n  displayName: "{layout.display_name}",\n  ctrlRightIsOem8: {"true" if layout.has_right_ctrl_like_oem8 else "false"},\n  keymap: {{\n')
+    json = ['{\n']
 
     for (text, codepoint), scancodes_by_mods in normal_rkeymap.items():
         k = char_to_char_table.get(text) or (text if text.isprintable() else (f'\\x{codepoint:02x}' if codepoint <=0xff else f'\\u{codepoint:04x}'))
-        output.append(f"    '{k}': {{ ")
+        json.append(f"    '{k}': {{ ")
         for mod_flags, rkeys in scancodes_by_mods.items():
-            # output.append(f"      0x{mod_flags:x}: [{''.join(rkeys)}], \n")
-            output.append(f"0x{mod_flags:x}: {rkeys[0]}")
-        output.append("},\n")
+            # json.append(f"      0x{mod_flags:x}: [{''.join(rkeys)}], \n")
+            json.append(f"0x{mod_flags:x}: {rkeys[0]}")
+        json.append("},\n")
 
-    output.append(f'  }},\n  deadkeys: {{\n')
+    json.append('  };\n\n')
+
+    kn = keymap_vars.setdefault(''.join(json), len(keymap_vars))
+    output.append(f'keymap{kn},\n    deadkeys: ')
+
+    json = ['{\n']
 
     accents = dict()
     push_ref = lambda scancodes_by_mods: \
@@ -261,21 +268,50 @@ for layout in layouts:
 
     for text, (scancodes_by_mods, rkey) in rdeadkeymap.items():
         text = char_to_char_table.get(text, text)
-        output.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, {rkey}],\n")
+        json.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, {rkey}],\n")
 
     for text, (scancodes_by_mods, rkeys) in rdeadkeymap2.items():
         text = char_to_char_table.get(text, text)
-        output.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, {rkeys}],\n")
+        json.append(f"    '{text}': [{push_ref(scancodes_by_mods)}, {rkeys}],\n")
 
-    output.append('  },\n  accents: [\n')
+    json.append('  };\n\n')
+
+    kn = dkeymap_vars.setdefault(''.join(json), len(dkeymap_vars))
+    output.append(f'dkeymap{kn},\n    accents: ')
+
+    json = ['[']
 
     for scancodes in accents:
-        output.append(f'    {{{scancodes}}},\n')
+        json.append(f'    {{{scancodes}}},\n')
 
-    output.append('  ]\n},\n')
+    json.append('  ];\n\n')
 
-output.append('];\n\n')
+    kn = accent_vars.setdefault(''.join(json), len(accent_vars))
+    output.append(f'accents{kn},\n  }},\n')
 
+
+print(
+    '// keymap: { text: { mod_flags: scancode } }\n'
+    '// deadkeys: { text: [ idxAccent, idxKeymap, idxKeymap ? ]\n'
+    '// accents: [ { mod_flags: scancode } ]\n'
+    'const layouts = (function(){'
+)
+
+def print_keymap_dict(name:str, d:dict[str,int]):
+    a = []
+    for kmap,i in d.items():
+        a.append(f'  const {name}{i} = ')
+        a.append(kmap)
+    print(''.join(a))
+
+print_keymap_dict('keymap', keymap_vars)
+print_keymap_dict('accents', accent_vars)
+print_keymap_dict('dkeymap', dkeymap_vars)
+
+output.append('  ];\n})();\n\n')
+print(''.join(output))
+
+output = []
 output.append('const actionLayout = {\n')
 for key_and_scancode in vk_actions.values():
     output.append(f'  "{key_and_scancode[0]}": 0x{key_and_scancode[1]:x},\n')
