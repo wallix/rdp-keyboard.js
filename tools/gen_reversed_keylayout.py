@@ -296,7 +296,7 @@ for layout in layouts:
     kn = dkeymap_vars.setdefault(''.join(json), len(dkeymap_vars))
     output.append(f'dkeymap{kn},\n    accents: ')
 
-    json = ['[']
+    json = ['[\n']
 
     for scancodes in accents:
         json.append(f'    {{{scancodes}}},\n')

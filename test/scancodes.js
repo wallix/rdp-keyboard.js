@@ -408,7 +408,7 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
-    test('acquiring and releasing <ô>; Deadkey case', t => {
+    test('acquiring and releasing <ô>; FR Deadkey case', t => {
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Dead", "BracketLeft", KeyAcquire), undefined);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -418,7 +418,7 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
         // we send the input
-        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ô", "KeyO", KeyAcquire), [0x1a, 0x18]);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ô", "KeyO", KeyAcquire), [0x1a, 0x18, 0x801a]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
@@ -664,7 +664,7 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
         t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Ꮭ", "KeyQ", KeyAcquire), [0x14, 0x2a, 0x3a, 0x803a, 0x26, 0x802a, 0x3a, 0x803a, 0x1e]);
+        t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Ꮭ", "KeyQ", KeyAcquire), [0x14, 0x2a, 0x3a, 0x803a, 0x26, 0x802a, 0x3a, 0x803a, 0x1e, 0x8014]);
         t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
         t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
 
