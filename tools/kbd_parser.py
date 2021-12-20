@@ -28,7 +28,7 @@ class Key(NamedTuple):
     deadkeys:DeadKeysType
 
     def is_extended(self) -> bool:
-        return True if (self.scancode >> 8) == 0xE0 else False
+        return True if self.scancode & 0x80 else False
 
 KeymapType = list[Optional[Key]] # always 256 elements
 KeymapsType = dict[str, KeymapType] # {mods: keymap}
