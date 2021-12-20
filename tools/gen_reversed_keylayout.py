@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from typing import Optional, NamedTuple
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 import sys
 import os
 
@@ -163,6 +163,7 @@ def key_to_scancode(key:Key) -> int:
     scancode = key.scancode & 0x7f
     return extended | scancode
 
+numpad_symbol_scancode = (0x53, 0x135, 0x37, 0x4A, 0x4E, 0x11C)
 
 layouts:list[KeyLayout] = parse_argv()
 
@@ -179,6 +180,12 @@ output = [
 for layout in layouts:
     normal_rkeymap = {}
     normal_ksyms = set()
+
+    numpad_chars = Counter(key.text
+                           for mods,keymap in layout.keymaps.items()
+                           for key in keymap
+                           if key and key.text and key_to_scancode(key) in numpad_symbol_scancode)
+
     # text character and action
     for mods,keymap in layout.keymaps.items():
         mod_flags = vk_mod_to_mod_flags(mods)
@@ -189,6 +196,9 @@ for layout in layouts:
         for key in keymap:
             if key and not key.deadkeys:
                 if key.text:
+                    # ignore numpad symbol in conflict with other key
+                    if key.text in numpad_chars and key_to_scancode(key) in numpad_symbol_scancode:
+                        continue
                     map:dict = normal_rkeymap.setdefault((key.text, key.codepoint), {})
                     normal_ksyms.add(key.text)
                     scancodes:list = map.setdefault(mod_flags, [])
@@ -199,7 +209,7 @@ for layout in layouts:
                         error_messages.append(f'Action key with control key ({key.vk} + {mods or "noMod"}) in {layout.display_name} (0x{layout.klid})')
                     else:
                         scancode = key_to_scancode(key)
-                        # not numpad
+                        # not numpad digit/action
                         if scancode < 0x47 and scancode > 0x53 and key_and_scancode[1] != scancode and (key.vk, scancode) not in vk_actions_dup:
                             error_messages.append(f'Bad scancode for action key: {key_and_scancode[0]} (0x{scancode:x} instead of 0x{key_and_scancode[1]:x}) in {layout.display_name} (0x{layout.klid}), {str(key)} {mods}')
 

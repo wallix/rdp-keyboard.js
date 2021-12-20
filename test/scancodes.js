@@ -17,6 +17,14 @@ const rkeymapFr = (() => {
   }
 })();
 
+const rkeymapUs = (() => {
+  for (const layout of layouts) {
+      if (layout.localeName === "en-US") {
+          return new ReversedKeymap(layout);
+      }
+  }
+})();
+
 const rkeymapDoubleDeadKey = (() => {
   for (const layout of layouts) {
       if (layout.klid === 0x0001045c) {
@@ -108,6 +116,26 @@ test('toScancodesAndFlags()', t => {
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802A]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
+    test('acquiring and releasing shift + : = / (FR to US keyboard)', t => {
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("/", "Period", KeyAcquire), [0x802A, 0x35, 0x2A]);
+        t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("/", "Period", KeyRelease), [0x8035]);
+        t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802A]);
+        t.hexEqual(rkeymapUs.getModFlags(), 0);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
 
         t.end();
     });
