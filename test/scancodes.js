@@ -140,6 +140,14 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
+    test('acquiring and releasing é = undefined (FR to US keyboard)', t => {
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("é", "Digit2", KeyAcquire), undefined);
+        t.hexEqual(rkeymapUs.getModFlags(), 0);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
     test('acquiring and releasing <Enter>', t => {
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Enter", "Enter", KeyAcquire), [0x1C]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
