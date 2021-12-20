@@ -163,7 +163,7 @@ def key_to_scancode(key:Key) -> int:
     scancode = key.scancode & 0x7f
     return extended | scancode
 
-numpad_symbol_scancode = (0x53, 0x135, 0x37, 0x4A, 0x4E, 0x11C)
+numpad_symbol_scancode = {0x53, (0x100 >> 1) | 0x35, 0x37, 0x4A, 0x4E, (0x100 >> 1) | 0x1C}
 
 layouts:list[KeyLayout] = parse_argv()
 
@@ -181,10 +181,17 @@ for layout in layouts:
     normal_rkeymap = {}
     normal_ksyms = set()
 
-    numpad_chars = Counter(key.text
-                           for mods,keymap in layout.keymaps.items()
-                           for key in keymap
-                           if key and key.text and key_to_scancode(key) in numpad_symbol_scancode)
+    # char of numpad symbol
+    numpad_chars = set(key.text
+                       for mods,keymap in layout.keymaps.items()
+                       for scancode in numpad_symbol_scancode
+                       if (key := keymap[scancode]) and key.text)
+
+    # numpad symbol in conflict with other keys
+    numpad_chars = set(key.text
+                       for mods,keymap in layout.keymaps.items()
+                       for key in keymap
+                       if key and key.text in numpad_chars)
 
     # text character and action
     for mods,keymap in layout.keymaps.items():
@@ -196,8 +203,8 @@ for layout in layouts:
         for key in keymap:
             if key and not key.deadkeys:
                 if key.text:
-                    # ignore numpad symbol in conflict with other key
-                    if key.text in numpad_chars and key_to_scancode(key) in numpad_symbol_scancode:
+                    # ignore numpad symbol in conflict with key
+                    if key.text in numpad_chars and key.scancode in numpad_symbol_scancode:
                         continue
                     map:dict = normal_rkeymap.setdefault((key.text, key.codepoint), {})
                     normal_ksyms.add(key.text)
