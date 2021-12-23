@@ -422,7 +422,13 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
+        // release simple key
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        // release composite key
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ô", "KeyO", KeyRelease), [0x8018]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
