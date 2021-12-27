@@ -435,12 +435,87 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
+    test('acquiring and releasing <Shift+Ô>; FR Deadkey case', t => {
+        // lshift down + Ô down + o up + lshift up
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2a]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Ô", "KeyO", KeyAcquire), [0x802a, 0x1a, 0x2a, 0x801a, 0x18]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        // lshift down + Ô down + lshift up + o up
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2a]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Ô", "KeyO", KeyAcquire), [0x802a, 0x1a, 0x2a, 0x801a, 0x18]);
+        t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802a]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        // rshift down + Ô down + o up + lshift up
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Ô", "KeyO", KeyAcquire), [0x8036, 0x1a, 0x36, 0x801a, 0x18]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        // rshift down + Ô down + lshift up + o up
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Ô", "KeyO", KeyAcquire), [0x8036, 0x1a, 0x36, 0x801a, 0x18]);
+        t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyRelease), [0x8036]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("o", "KeyO", KeyRelease), [0x8018]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
     test('acquiring and releasing <ö>; FR Deadkey case', t => {
-        // we send the input
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ö", "KeyO", KeyAcquire), [0x2A, 0x1A, 0x802A, 0x801A, 0x18]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
-        // release
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ö", "KeyO", KeyRelease), [0x8018]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
