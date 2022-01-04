@@ -408,6 +408,46 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
+    test('acquiring AltGr+0 (=@) releasing 0 then AltGr', t => {
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("@", "Digit0", KeyAcquire), [0xb]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("à", "Digit0", KeyRelease), [0x800b]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
+    test('acquiring AltGr+0 (=@) releasing 0 then AltGr (fr -> en)', t => {
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
+        t.hexEqual(rkeymapUs.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("@", "Digit0", KeyAcquire), [0x2a, 0x8138, 0x3, 0x802a, 0x138]);
+        t.hexEqual(rkeymapUs.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
+        t.hexEqual(rkeymapUs.getModFlags(), 0);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("à", "Digit0", KeyRelease), undefined);
+        t.hexEqual(rkeymapUs.getModFlags(), 0);
+        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
     test('acquiring and releasing <ô>; FR Deadkey case', t => {
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Dead", "BracketLeft", KeyAcquire), undefined);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
