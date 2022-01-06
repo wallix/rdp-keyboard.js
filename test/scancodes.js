@@ -70,6 +70,8 @@ const RightCtrlMod  = 1 << 10;
 
 test('toScancodesAndFlags()', t => {
     test('not character', t => {
+        rkeymapFr.sync(0);
+
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
@@ -77,6 +79,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('unknown character for french keyboard <ß>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ß", "KeyA", KeyAcquire), undefined);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -89,6 +93,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <b>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("b", "KeyB", KeyAcquire), [0x30]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -101,6 +107,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Shift+:> (/)', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
         t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -121,6 +129,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing shift + : = / (FR to US keyboard)', t => {
+        rkeymapUs.sync(0);
+
         t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
         t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
@@ -141,6 +151,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing é = undefined (FR to US keyboard)', t => {
+        rkeymapUs.sync(0);
+
         t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("é", "Digit2", KeyAcquire), undefined);
         t.hexEqual(rkeymapUs.getModFlags(), 0);
         t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
@@ -149,6 +161,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Enter>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Enter", "Enter", KeyAcquire), [0x1C]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -161,6 +175,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing Escape', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Escape", "Escape", KeyAcquire), [0x01]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -173,6 +189,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <A>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
         t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -193,6 +211,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <A>; weird case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
         t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -213,6 +233,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <A>; ShiftRight case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
         t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -233,6 +255,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <A>; ShiftRight + ShiftLeft', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftRight", KeyAcquire), [0x36]);
         t.hexEqual(rkeymapFr.getModFlags(), RightShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -261,6 +285,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <a>; ShiftLeft, weird browser case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
         t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -281,6 +307,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <a>; ShiftLeft, interlaced and weird browser case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
         t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -301,6 +329,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <A>; Capslock case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
         t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
@@ -329,6 +359,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <a>; Capslock case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("CapsLock", "CapsLock", KeyAcquire), [0x3a]);
         t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
@@ -357,6 +389,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <A>; Capslock & NumLock case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("NumLock", "NumLock", KeyAcquire), [0x45]);
         t.hexEqual(rkeymapFr.getModFlags(), NumLockMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -449,6 +483,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <ô>; FR Deadkey case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Dead", "BracketLeft", KeyAcquire), undefined);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -476,6 +512,7 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Shift+Ô>; FR Deadkey case', t => {
+        rkeymapFr.sync(0);
         // lshift down + Ô down + o up + lshift up
 
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2a]);
@@ -552,6 +589,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <ö>; FR Deadkey case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ö", "KeyO", KeyAcquire), [0x2A, 0x1A, 0x802A, 0x801A, 0x18]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -559,10 +598,43 @@ test('toScancodesAndFlags()', t => {
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("ö", "KeyO", KeyRelease), [0x8018]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
+    test('acquiring and releasing dead key <~>; FR', t => {
+        rkeymapFr.sync(0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Alt", "AltLeft", KeyAcquire), [0x38]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("~", "", KeyAcquire), [0x3, 0x8003, 0x8038, 0x801d, 0x39, 0x38, 0x1d]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("~", "", KeyRelease), [0x8039]);
+        t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyRelease), [0x801D]);
+        t.hexEqual(rkeymapFr.getModFlags(), AltMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Alt", "AltLeft", KeyRelease), [0x8038]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
         t.end();
     });
 
     test('acquiring and releasing <Ctrl+A>; "Select All" case', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -584,6 +656,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Ctrl+Alt+AltGr>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -701,6 +775,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Shift>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2a]);
         t.hexEqual(rkeymapFr.getModFlags(), ShiftMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), ShiftMod);
@@ -721,6 +797,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <OS>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("OS", "OSLeft", KeyAcquire), [0x15b]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -741,6 +819,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Meta>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Meta", "MetaLeft", KeyAcquire), [0x15b]);
         t.hexEqual(rkeymapFr.getModFlags(), 0);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -761,6 +841,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing <Ctrl + Backspace>', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("Control", "ControlLeft", KeyAcquire), [0x1D]);
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
@@ -780,7 +862,9 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
-    test('acquiring and releasing double deak key <~>', t => {
+    test('acquiring and releasing double dead key <~>', t => {
+        rkeymapDoubleDeadKey.sync(0);
+
         t.hexArrayEqual(rkeymapDoubleDeadKey.toScancodesAndFlags("Dead", "KeyT", KeyAcquire), undefined);
         t.hexEqual(rkeymapDoubleDeadKey.getModFlags(), 0);
         t.hexEqual(rkeymapDoubleDeadKey.getVirtualModFlags(), 0);
