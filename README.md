@@ -28,3 +28,9 @@ tar --zstd -xf ./tools/gen_locale/kbdlayout.info.zst
 ```sh
 ./tools/gen_reversed_keylayout.sh --all
 ```
+
+Readable version with
+
+```sh
+DEBUG=1 ./tools/gen_reversed_keylayout.sh --all
+```

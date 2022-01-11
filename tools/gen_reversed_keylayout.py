@@ -173,6 +173,21 @@ error_messages = []
 keymap_vars = {}
 accent_vars = {}
 dkeymap_vars = {}
+keys_vars = {}
+
+if os.environ.get('DEBUG') == '1':
+    def push_keys(scancodes_by_mods):
+        s = ''
+        for mod_flags, rkeys in scancodes_by_mods.items():
+            s = f'{s}0x{mod_flags:x}: {rkeys[0]}'
+        return f"{{ {''.join(s)}}}"
+else:
+    def push_keys(scancodes_by_mods):
+        s = ''
+        for mod_flags, rkeys in scancodes_by_mods.items():
+            s = f'{s}0x{mod_flags:x}: {rkeys[0]}'
+        i = keys_vars.setdefault(f"{{ {''.join(s)}}};\n", len(keys_vars))
+        return f'key{i}'
 
 output = [
     '  return [\n'
@@ -270,11 +285,7 @@ for layout in layouts:
 
     for (text, codepoint), scancodes_by_mods in normal_rkeymap.items():
         k = char_to_char_table.get(text) or (text if text.isprintable() else (f'\\x{codepoint:02x}' if codepoint <=0xff else f'\\u{codepoint:04x}'))
-        json.append(f"    '{k}': {{ ")
-        for mod_flags, rkeys in scancodes_by_mods.items():
-            # json.append(f"      0x{mod_flags:x}: [{''.join(rkeys)}], \n")
-            json.append(f"0x{mod_flags:x}: {rkeys[0]}")
-        json.append("},\n")
+        json.append(f"    '{k}': {push_keys(scancodes_by_mods)},\n")
 
     json.append('  };\n\n')
 
@@ -330,6 +341,7 @@ def print_keymap_dict(name:str, d:dict[str,int]):
         a.append(kmap)
     print(''.join(a))
 
+print_keymap_dict('key', keys_vars)
 print_keymap_dict('keymap', keymap_vars)
 print_keymap_dict('accents', accent_vars)
 print_keymap_dict('dkeymap', dkeymap_vars)
