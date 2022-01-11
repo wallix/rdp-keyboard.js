@@ -21,6 +21,7 @@ vk_control_masks = {
     'VK_NUMLOCK':   1 << 8,
 }
 nomod = 0
+capslock = vk_control_masks['VK_CAPITAL']
 numlock = vk_control_masks['VK_NUMLOCK']
 ctrl = vk_control_masks['VK_CONTROL']
 alt = vk_control_masks['VK_MENU']
@@ -206,9 +207,9 @@ for layout in layouts:
                     # ignore numpad symbol in conflict with key
                     if key.text in numpad_chars and key.scancode in numpad_symbol_scancode:
                         continue
-                    map:dict = normal_rkeymap.setdefault((key.text, key.codepoint), {})
+                    scancodes_by_mods:dict = normal_rkeymap.setdefault((key.text, key.codepoint), {})
                     normal_ksyms.add(key.text)
-                    scancodes:list = map.setdefault(mod_flags, [])
+                    scancodes:list = scancodes_by_mods.setdefault(mod_flags, [])
                     scancodes.append(f'0x{key_to_scancode(key):x}, ')
 
                 elif key_and_scancode := vk_actions.get(key.vk, None):
@@ -223,6 +224,14 @@ for layout in layouts:
                 elif key.vk is not None and key.vk not in vk_unknowns:
                     if not (key.codepoint == 0 and mod_flags in (nomod, ctrl)):
                         error_messages.append(f'Unknown {key} + {mods or "noMod"} in {layout.display_name} (0x{layout.klid})')
+
+    # add capslock when missing
+    for scancodes_by_mods in normal_rkeymap.values():
+        scancodes_by_mods.update({
+            (mod_flags | capslock): rkeys
+            for mod_flags, rkeys in scancodes_by_mods.items()
+                if not any(mod_flags & capslock for mod_flags in scancodes_by_mods)
+        })
 
     # dead key and dead key of dead key
     rdeadkeymap = {}

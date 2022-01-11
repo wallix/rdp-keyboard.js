@@ -442,7 +442,33 @@ test('toScancodesAndFlags()', t => {
         t.end();
     });
 
+    test('<, CapsLock+< ; Fr', t => {
+        rkeymapFr.sync(0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("<", "IntlBackslash", KeyAcquire), [0x56]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("<", "IntlBackslash", KeyRelease), [0x8056]);
+        t.hexEqual(rkeymapFr.getModFlags(), 0);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
+
+        rkeymapFr.sync(CapsLockMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("<", "IntlBackslash", KeyAcquire), [0x56]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
+
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("<", "IntlBackslash", KeyRelease), [0x8056]);
+        t.hexEqual(rkeymapFr.getModFlags(), CapsLockMod);
+        t.hexEqual(rkeymapFr.getVirtualModFlags(), CapsLockMod);
+
+        t.end();
+    });
+
     test('acquiring AltGr+0 (=@) releasing 0 then AltGr', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
         t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
@@ -463,6 +489,8 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring AltGr+0 (=@) releasing 0 then AltGr (fr -> en)', t => {
+        rkeymapFr.sync(0);
+
         t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
         t.hexEqual(rkeymapUs.getModFlags(), AltGrMod);
         t.hexEqual(rkeymapUs.getVirtualModFlags(), AltGrMod);
