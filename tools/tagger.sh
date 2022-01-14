@@ -7,7 +7,7 @@ get_version() {
 }
 
 set_version() {
-    sed -iE 's/^ReversedKeymap\.version = .*/'"$1"'/' lib/scancodes.js
+    sed -i -E 's/^ReversedKeymap\.version = .*/ReversedKeymap.version = "'"$1"'";/' lib/scancodes.js
 }
 
 current_version=$(get_version) || exit $?
@@ -54,7 +54,6 @@ fi
 
 
 if [[ -z "$new_version" ]] ; then
-    echo missing --new-version
     usage
 fi
 
