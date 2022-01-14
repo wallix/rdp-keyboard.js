@@ -17,9 +17,17 @@ const rkeymapFr = (() => {
   }
 })();
 
-const rkeymapUs = (() => {
+const rkeymapUsInternational = (() => {
   for (const layout of layouts) {
-      if (layout.localeName === "en-US") {
+      if (layout.displayName === "United States-International") {
+          return new ReversedKeymap(layout);
+      }
+  }
+})();
+
+const rkeymapEn = (() => {
+  for (const layout of layouts) {
+      if (layout.displayName === "United States - English") {
           return new ReversedKeymap(layout);
       }
   }
@@ -66,6 +74,31 @@ const AltMod      = 1 << 4;
 const NumLockMod  = 1 << 8;
 const RightShiftMod = 1 << 9;
 const RightCtrlMod  = 1 << 10;
+
+
+test('Fr layout', t => {
+    t.hexEqual(rkeymapFr.layout.klid, 0x40c);
+    t.equal(rkeymapFr.layout.altRightIsAltGr, true);
+    t.equal(rkeymapFr.layout.ctrlRightIsOem8, false);
+    t.equal(rkeymapFr.ctrlAndAltIsAltGr, true);
+    t.end();
+});
+
+test('Us international', t => {
+    t.hexEqual(rkeymapUsInternational.layout.klid, 0x20409);
+    t.equal(rkeymapUsInternational.layout.altRightIsAltGr, true);
+    t.equal(rkeymapUsInternational.layout.ctrlRightIsOem8, false);
+    t.equal(rkeymapUsInternational.ctrlAndAltIsAltGr, true);
+    t.end();
+});
+
+test('En layout', t => {
+    t.hexEqual(rkeymapEn.layout.klid, 0x409);
+    t.equal(rkeymapEn.layout.altRightIsAltGr, false);
+    t.equal(rkeymapEn.layout.ctrlRightIsOem8, false);
+    t.equal(rkeymapEn.ctrlAndAltIsAltGr, false);
+    t.end();
+});
 
 
 test('toScancodesAndFlags()', t => {
@@ -129,33 +162,33 @@ test('toScancodesAndFlags()', t => {
     });
 
     test('acquiring and releasing shift + : = / (FR to US keyboard)', t => {
-        rkeymapUs.sync(0);
+        rkeymapEn.sync(0);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
-        t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("Shift", "ShiftLeft", KeyAcquire), [0x2A]);
+        t.hexEqual(rkeymapEn.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("/", "Period", KeyAcquire), [0x802A, 0x35, 0x2A]);
-        t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("/", "Period", KeyAcquire), [0x802A, 0x35, 0x2A]);
+        t.hexEqual(rkeymapEn.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("/", "Period", KeyRelease), [0x8035]);
-        t.hexEqual(rkeymapUs.getModFlags(), ShiftMod);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), ShiftMod);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("/", "Period", KeyRelease), [0x8035]);
+        t.hexEqual(rkeymapEn.getModFlags(), ShiftMod);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), ShiftMod);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802A]);
-        t.hexEqual(rkeymapUs.getModFlags(), 0);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("Shift", "ShiftLeft", KeyRelease), [0x802A]);
+        t.hexEqual(rkeymapEn.getModFlags(), 0);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), 0);
 
         t.end();
     });
 
     test('acquiring and releasing é = undefined (FR to US keyboard)', t => {
-        rkeymapUs.sync(0);
+        rkeymapEn.sync(0);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("é", "Digit2", KeyAcquire), undefined);
-        t.hexEqual(rkeymapUs.getModFlags(), 0);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("é", "Digit2", KeyAcquire), undefined);
+        t.hexEqual(rkeymapEn.getModFlags(), 0);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), 0);
 
         t.end();
     });
@@ -491,21 +524,45 @@ test('toScancodesAndFlags()', t => {
     test('acquiring AltGr+0 (=@) releasing 0 then AltGr (fr -> en)', t => {
         rkeymapFr.sync(0);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
-        t.hexEqual(rkeymapUs.getModFlags(), AltGrMod);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), AltGrMod);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
+        t.hexEqual(rkeymapEn.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("@", "Digit0", KeyAcquire), [0x2a, 0x8138, 0x3, 0x802a, 0x138]);
-        t.hexEqual(rkeymapUs.getModFlags(), AltGrMod);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), AltGrMod);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("@", "Digit0", KeyAcquire), [0x8138, 0x2a, 0x3, 0x802a, 0x138]);
+        t.hexEqual(rkeymapEn.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
-        t.hexEqual(rkeymapUs.getModFlags(), 0);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
+        t.hexEqual(rkeymapEn.getModFlags(), 0);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), 0);
 
-        t.hexArrayEqual(rkeymapUs.toScancodesAndFlags("à", "Digit0", KeyRelease), undefined);
-        t.hexEqual(rkeymapUs.getModFlags(), 0);
-        t.hexEqual(rkeymapUs.getVirtualModFlags(), 0);
+        t.hexArrayEqual(rkeymapEn.toScancodesAndFlags("à", "Digit0", KeyRelease), undefined);
+        t.hexEqual(rkeymapEn.getModFlags(), 0);
+        t.hexEqual(rkeymapEn.getVirtualModFlags(), 0);
+
+        t.end();
+    });
+
+    test('acquiring AltGr+0 (=@) releasing 0 then AltGr (fr -> us-international)', t => {
+        rkeymapFr.sync(0);
+
+        t.hexArrayEqual(rkeymapUsInternational.toScancodesAndFlags("AltGraph", "AltRight", KeyAcquire), [0x138]);
+        t.hexEqual(rkeymapUsInternational.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapUsInternational.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapUsInternational.toScancodesAndFlags("@", "Digit0", KeyAcquire), [0x2a, 0x8138, 0x3, 0x138, 0x802a]);
+        t.hexEqual(rkeymapUsInternational.getModFlags(), AltGrMod);
+        t.hexEqual(rkeymapUsInternational.getVirtualModFlags(), AltGrMod);
+
+        t.hexArrayEqual(rkeymapUsInternational.toScancodesAndFlags("AltGraph", "AltRight", KeyRelease), [0x8138]);
+        t.hexEqual(rkeymapUsInternational.getModFlags(), 0);
+        t.hexEqual(rkeymapUsInternational.getVirtualModFlags(), 0);
+
+        // not 0x3, this is "normal". Caller should associate a scancode KeyAcquire with a scancode KeyRelease
+        // scancodeForRelase = scancodesResult[scancodesResult.length / 2]
+        t.hexArrayEqual(rkeymapUsInternational.toScancodesAndFlags("à", "Digit0", KeyRelease), [0x801e]);
+        t.hexEqual(rkeymapUsInternational.getModFlags(), 0);
+        t.hexEqual(rkeymapUsInternational.getVirtualModFlags(), 0);
 
         t.end();
     });
@@ -641,7 +698,7 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("~", "", KeyAcquire), [0x3, 0x8003, 0x8038, 0x801d, 0x39, 0x38, 0x1d]);
+        t.hexArrayEqual(rkeymapFr.toScancodesAndFlags("~", "", KeyAcquire), [0x3, 0x8003, 0x8038, 0x801d, 0x39, 0x1d, 0x38]);
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
@@ -690,11 +747,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
@@ -703,11 +760,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), CtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
@@ -716,11 +773,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
@@ -729,11 +786,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), AltMod | AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod | AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod | AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
@@ -742,11 +799,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), AltGrMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
@@ -760,11 +817,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
@@ -773,11 +830,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), RightCtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), RightCtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), RightCtrlMod | AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), AltGrMod);
 
@@ -786,11 +843,11 @@ test('toScancodesAndFlags()', t => {
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = false;
+        rkeymapFr.ctrlAndAltIsAltGr = false;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
-        rkeymapFr.altGrIsCtrlAndAlt = true;
+        rkeymapFr.ctrlAndAltIsAltGr = true;
         t.hexEqual(rkeymapFr.getModFlags(), AltMod);
         t.hexEqual(rkeymapFr.getVirtualModFlags(), 0);
 
