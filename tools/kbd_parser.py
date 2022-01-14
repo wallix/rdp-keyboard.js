@@ -40,6 +40,7 @@ class KeyLayout(NamedTuple):
     proxy_name:str
     keymaps:KeymapsType
     extra_scancodes:dict[int, Key]
+    alt_right_is_altgr:bool
     has_right_ctrl_like_oem8:bool
 
 display_name_to_proxy_name = {
@@ -219,6 +220,7 @@ def parse_xml_layout(filename, log=verbose_print):
     extra_scancodes = {}
 
     root = ElementTree.parse(filename).getroot()
+    alt_right_is_altgr = True if root.attrib['RightAltIsAltGr'] == 'true' else False
     klid, locale_name, display_name = _getattribs(log, root[0], 'metadata', {'KLID': True,
                                                                              'LocaleName': True,
                                                                              'LayoutDisplayName': True})
@@ -321,7 +323,7 @@ def parse_xml_layout(filename, log=verbose_print):
     return KeyLayout(klid, locale_name, rename_display_name_map.get(klid, display_name),
                      display_name_to_proxy_name.get(display_name, None),
                      keymaps, extra_scancodes,
-                     right_ctrl_like_oem8)
+                     alt_right_is_altgr, right_ctrl_like_oem8)
 
 def _accu_scancodes(strings:list[str], map:list[Key]):
     for i,k in enumerate(map):
@@ -346,7 +348,7 @@ def _accu_scancodes(strings:list[str], map:list[Key]):
             strings.append(f"  0x{i:02X} -\n")
 
 def print_layout(layout:KeyLayout, printer=sys.stdout.write):
-    strings = [f'KLID: {layout.klid}\nLocalName: {layout.locale_name}\nDisplayName: {layout.display_name}\n']
+    strings = [f'KLID: {layout.klid}\nLocalName: {layout.locale_name}\nDisplayName: {layout.display_name}\nRightAltIsAltGr: {layout.alt_right_is_altgr}\nRightCtrlIsOEM8: {layout.has_right_ctrl_like_oem8}\n']
 
     for mapname,map in layout.keymaps.items():
         strings.append(f'{mapname or "normal"} (0x00)\n')

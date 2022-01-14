@@ -279,7 +279,7 @@ for layout in layouts:
     for k in rdeadkeymap:
         rdeadkeymap2.pop(k, None)
 
-    output.append(f'  {{\n    klid: 0x{layout.klid},\n    localeName: "{layout.locale_name}",\n    displayName: "{layout.display_name}",\n    ctrlRightIsOem8: {"true" if layout.has_right_ctrl_like_oem8 else "false"},\n    keymap: ')
+    output.append(f'  {{\n    klid: 0x{layout.klid},\n    localeName: "{layout.locale_name}",\n    displayName: "{layout.display_name}",\n    ctrlRightIsOem8: {"true" if layout.has_right_ctrl_like_oem8 else "false"},\n    altRightIsAltGr: {"true" if layout.alt_right_is_altgr else "false"},\n    keymap: ')
 
     json = ['{\n']
 
