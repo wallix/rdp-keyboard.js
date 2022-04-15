@@ -4,7 +4,6 @@ from collections import OrderedDict, Counter
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '../../../../tools/gen_locale'))
 from kbd_parser import KeymapType, KeyLayout, Key, parse_argv
 
 
@@ -138,7 +137,6 @@ vk_unknowns = set((
 ))
 
 char_to_char_table = {
-    '\a': '\\a',
     '\b': '\\b',
     '\t': '\\t',
     '\n': '\\n',
