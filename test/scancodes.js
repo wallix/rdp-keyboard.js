@@ -4,7 +4,7 @@ const {test, Test} = require('tap')
 
 const {
     ReversedKeymap, SyncFlags, KeyAcquire, KeyRelease, toHumanReadableMods,
-    scancodesForSynchronizedMods,
+    scancodesForSynchronizedMods, scancodesForKeyAcquireMods,
 } = require("scancodes");
 
 const layouts = require("reversed_layouts").layouts;
@@ -1026,6 +1026,15 @@ test('scancodesForSynchronizedMods()', t => {
         KeyRelease | 0x138,
         KeyRelease | 0x15B,
         KeyRelease | 0x15C,
+    ]);
+
+    t.end();
+});
+
+test('scancodesForKeyAcquireMods()', t => {
+    t.same(scancodesForKeyAcquireMods(SyncFlags.AltLeft | SyncFlags.ShiftRight), [
+        KeyAcquire | 0x36,
+        KeyAcquire | 0x38,
     ]);
 
     t.end();
