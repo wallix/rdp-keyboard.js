@@ -17,13 +17,13 @@ npm i
 ./test.sh --output-html
 ```
 
-# Uncompress kbdlayout.info.zst
+# generate lib/reversed_layouts.js
 
 ```sh
-tar --zstd -xf ./tools/gen_locale/kbdlayout.info.zst
+./tools/gen_reversed_keylayout.sh
 ```
 
-# generate lib/reversed_layouts.js
+or
 
 ```sh
 ./tools/gen_reversed_keylayout.sh --all

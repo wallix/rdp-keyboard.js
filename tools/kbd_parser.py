@@ -8,6 +8,7 @@ import sys
 rename_display_name_map = {
     '00000409': 'United States - English',
     '0000041a': 'Croatian',
+    '0000040c': 'French',
 }
 
 # key = (accent, with_key)
@@ -52,6 +53,9 @@ display_name_to_proxy_name = {
     'Spanish': 'es-ES',
     'Finnish': 'fi-FI.finnish',
     'French': 'fr-FR',
+    'French (Legacy, AZERTY)': 'fr-FR',
+    'French (Standard, AZERTY)': 'fr-FR.standard',
+    'French (Standard, BÉPO)': 'bépo',
     'Icelandic': 'is-IS',
     'Italian': 'it-IT',
     'Dutch': 'nl-NL',
