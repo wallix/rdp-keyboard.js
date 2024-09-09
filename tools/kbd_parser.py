@@ -6,9 +6,9 @@ import sys
 
 
 rename_display_name_map = {
-    '00000409': 'United States - English',
-    '0000041a': 'Croatian',
-    '0000040c': 'French',
+    '00000409': 'United States - English',  # US
+    '0000041a': 'Croatian',  # Standard
+    '0000040c': 'French',  # French (Legacy, AZERTY)
 }
 
 # key = (accent, with_key)
@@ -38,101 +38,11 @@ class KeyLayout(NamedTuple):
     klid:int
     locale_name:str
     display_name:str
-    proxy_name:str
+    origin_display_name:str
     keymaps:KeymapsType
     extra_scancodes:dict[int, Key]
     alt_right_is_altgr:bool
     has_right_ctrl_like_oem8:bool
-
-display_name_to_proxy_name = {
-    'Czech': 'cs-CZ',
-    'Danish': 'da-DK',
-    'German': 'de-DE',
-    'Greek': 'el-GR',
-    'US': 'en-US',
-    'Spanish': 'es-ES',
-    'Finnish': 'fi-FI.finnish',
-    'French': 'fr-FR',
-    'French (Legacy, AZERTY)': 'fr-FR',
-    'French (Standard, AZERTY)': 'fr-FR.standard',
-    'French (Standard, BÉPO)': 'bépo',
-    'Icelandic': 'is-IS',
-    'Italian': 'it-IT',
-    'Dutch': 'nl-NL',
-    'Norwegian': 'nb-NO',
-    'Polish (Programmers)': 'pl-PL.programmers',
-    'Portuguese (Brazil ABNT)': 'pt-BR.abnt',
-    'Romanian (Legacy)': 'ro-RO',
-    'Russian': 'ru-RU',
-    'Standard': 'hr-HR',
-    'Slovak': 'sk-SK',
-    'Swedish': 'sv-SE',
-    'Turkish Q': 'tr-TR.q',
-    'Ukrainian': 'uk-UA',
-    'Slovenian': 'sl-SI',
-    'Estonian': 'et-EE',
-    'Latvian': 'lv-LV',
-    'Lithuanian IBM': 'lt-LT.ibm',
-    'Macedonian': 'mk-MK',
-    'Faeroese': 'fo-FO',
-    'Maltese 47-Key': 'mt-MT.47',
-    'Norwegian with Sami': 'se-NO',
-    'Kazakh': 'kk-KZ',
-    'Kyrgyz Cyrillic': 'ky-KG',
-    'Tatar (Legacy)': 'tt-RU',
-    'Mongolian Cyrillic': 'mn-MN',
-    'United Kingdom Extended': 'cy-GB',
-    'Luxembourgish': 'lb-LU',
-    'Maori': 'mi-NZ',
-    'Swiss German': 'de-CH',
-    'United Kingdom': 'en-GB',
-    'Latin American': 'es-MX',
-    'Belgian French': 'fr-BE.fr',
-    'Belgian (Period)': 'nl-BE',
-    'Portuguese': 'pt-PT',
-    'Serbian (Latin)': 'sr-La',
-    'Swedish with Sami': 'se-SE',
-    'Uzbek Cyrillic': 'uz-Cy',
-    'Inuktitut - Latin': 'iu-La',
-    'Canadian French (Legacy)': 'fr-CA',
-    'Serbian (Cyrillic)': 'sr-Cy',
-    'Canadian French': 'en-CA.fr',
-    'Swiss French': 'fr-CH',
-    'Irish': 'en-IE.irish',
-    'Bosnian (Cyrillic)': 'bs-Cy',
-    'Bulgarian (Latin)': 'bg-BG.latin',
-    'Czech (QWERTY)': 'cs-CZ.qwerty',
-    'German (IBM)': 'de-DE.ibm',
-    'Greek (220)': 'el-GR.220',
-    'United States-Dvorak': 'en-US.dvorak',
-    'Spanish Variation': 'es-ES.variation',
-    'Hungarian 101-key': 'hu-HU',
-    'Italian (142)': 'it-IT.142',
-    'Polish (214)': 'pl-PL',
-    'Portuguese (Brazil ABNT2)': 'pt-BR.abnt2',
-    'Russian (Typewriter)': 'ru-RU.typewriter',
-    'Slovak (QWERTY)': 'sk-SK.qwerty',
-    'Turkish F': 'tr-TR.f',
-    'Latvian (QWERTY)': 'lv-LV.qwerty',
-    'Lithuanian': 'lt-LT',
-    'Maltese 48-Key': 'mt-MT.48',
-    'Sami Extended Norway': 'se-NO.ext_norway',
-    'Belgian (Comma)': 'fr-BE',
-    'Finnish with Sami': 'se-SE',
-    'Canadian Multilingual Standard': 'en-CA.multilingual',
-    'Scottish Gaelic': 'en-IE',
-    'Czech Programmers': 'cs-CZ.programmers',
-    'Greek (319)': 'el-GR.319',
-    'United States-International': 'en-US.international',
-    'Sami Extended Finland-Sweden': 'se-SE.ext_finland_sweden',
-    'Bulgarian': 'bg-BG',
-    'Greek (220) Latin': 'el-GR.220_latin',
-    'United States-Dvorak for left hand': 'en-US.dvorak_left',
-    'Greek (319) Latin': 'el-GR.319_latin',
-    'United States-Dvorak for right hand': 'en-US.dvorak_right',
-    'Greek Latin': 'el-GR.latin',
-    'Greek Polytonic': 'el-GR.polytonic',
-}
 
 
 def _getattribs(log, node, nodename, attrs):
@@ -325,8 +235,7 @@ def parse_xml_layout(filename, log=verbose_print):
                 numlock_keymap[i] = k
 
     return KeyLayout(klid, locale_name, rename_display_name_map.get(klid, display_name),
-                     display_name_to_proxy_name.get(display_name, None),
-                     keymaps, extra_scancodes,
+                     display_name, keymaps, extra_scancodes,
                      alt_right_is_altgr, right_ctrl_like_oem8)
 
 def _accu_scancodes(strings:list[str], map:list[Key]):
