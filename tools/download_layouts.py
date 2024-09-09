@@ -3,9 +3,9 @@
 from urllib.request import (urlopen, URLError)
 import re
 
-lcid_re = re.compile('[0-9a-fA-F]{8}')
-klid_re = re.compile('.*>([0-9a-f]{8}) \(([^)]+).')
-ldname_re = re.compile('\n\s*<tr><th>Layout Display Name</th><td>([^<]+).*')
+lcid_re = re.compile(r'[0-9a-fA-F]{8}')
+klid_re = re.compile(r'.*>([0-9a-f]{8}) \(([^)]+).')
+ldname_re = re.compile(r'\n\s*<tr><th>Layout Display Name</th><td>([^<]+).*')
 
 ids = set()
 
