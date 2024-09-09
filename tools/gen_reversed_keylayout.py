@@ -295,8 +295,8 @@ for layout in layouts:
     accents = dict()
     push_ref = lambda scancodes_by_mods: \
         accents.setdefault(
-            ''.join(\
-                f"0x{mod_flags:x}: {sorted(set(x for x in ''.join(scancodes).split(', ') if x))[0]}, " \
+            ''.join(
+                f"0x{mod_flags:x}: {sorted(x for x in ''.join(scancodes).split(', ') if x)[0]}, "
                     for mod_flags, scancodes in scancodes_by_mods.items()),
             len(accents)
         )
