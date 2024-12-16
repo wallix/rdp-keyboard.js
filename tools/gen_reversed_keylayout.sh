@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# uncompress: tar --zstd -xf kbdlayout.info.zst
+# uncompress: tar --zstd -xf kbdlayout.info.tar.zst
 
 set -e
 
@@ -15,16 +15,12 @@ if [[ -z "$KBDLAYOUT_PATH" ]]; then
 fi
 
 case "$1" in
-  --all|all)
-    genfile "${KBDLAYOUT_PATH}"/* ;;
-
-  --regular|'')
-    source "$d"/keylayout_list.sh
-    genfile "${KBDLAYOUT_LAYOUTS[@]}" ;;
+  --all|all|'')
+    genfile "${KBDLAYOUT_PATH}"/*.xml ;;
 
   --help|help)
     echo "usage:
-$0 [--all|all|--regular|regular]
+$0 [--all|all]
 $0 files..." ;;
 
   *) genfile "$@"

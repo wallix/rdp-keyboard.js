@@ -23,14 +23,8 @@ npm i
 ./tools/gen_reversed_keylayout.sh
 ```
 
-or
-
-```sh
-./tools/gen_reversed_keylayout.sh --all
-```
-
 Readable version with
 
 ```sh
-DEBUG=1 ./tools/gen_reversed_keylayout.sh --all
+DEBUG=1 ./tools/gen_reversed_keylayout.sh
 ```

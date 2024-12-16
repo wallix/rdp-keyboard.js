@@ -18,7 +18,7 @@ class DeadKey(NamedTuple):
     with_: str
     text: str
     codepoint: int
-    deadkeys: DeadKeysType
+    deadkeys: DeadKeysType | None
 
 
 class Key(NamedTuple):
