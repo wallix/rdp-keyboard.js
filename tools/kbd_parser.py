@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-from typing import Optional, NamedTuple
-from xml.etree import ElementTree
-from itertools import chain
 import sys
-
+from collections.abc import Callable, Iterable
+from typing import Any, NamedTuple
+from xml.etree import ElementTree as ET
 
 rename_display_name_map = {
     '00000409': 'United States - English',  # US
@@ -12,52 +10,60 @@ rename_display_name_map = {
 }
 
 # key = (accent, with_key)
-DeadKeysType = dict[tuple[str,str], 'DeadKey']
+DeadKeysType = dict[tuple[str, str], 'DeadKey']
+
 
 class DeadKey(NamedTuple):
-    accent:str
-    with_:str
-    text:str
-    codepoint:int
-    deadkeys:DeadKeysType
+    accent: str
+    with_: str
+    text: str
+    codepoint: int
+    deadkeys: DeadKeysType
+
 
 class Key(NamedTuple):
-    scancode:int
-    codepoint:int # 0 when text is multi char text ; ord(accent) with deadkey
-    text:str # accent with deadkey
-    vk:str
-    deadkeys:DeadKeysType
+    scancode: int
+    codepoint: int  # 0 when text is multi char text ; ord(accent) with deadkey
+    text: str  # accent with deadkey
+    vk: str
+    deadkeys: DeadKeysType
 
     def is_extended(self) -> bool:
         return True if self.scancode & 0x80 else False
 
-KeymapType = list[Optional[Key]] # always 256 elements
-KeymapsType = dict[str, KeymapType] # {mods: keymap}
+
+KeymapType = list[Key | None]  # always 256 elements
+KeymapsType = dict[str, KeymapType]  # {mods: keymap}
+
 
 class KeyLayout(NamedTuple):
-    klid:int
-    locale_name:str
-    display_name:str
-    origin_display_name:str
-    keymaps:KeymapsType
-    extra_scancodes:dict[int, Key]
-    alt_right_is_altgr:bool
-    has_right_ctrl_like_oem8:bool
+    klid: int
+    locale_name: str
+    display_name: str
+    origin_display_name: str
+    keymaps: KeymapsType
+    extra_scancodes: dict[int, Key]
+    alt_right_is_altgr: bool
+    has_right_ctrl_like_oem8: bool
 
 
-def _getattribs(log, node, nodename, attrs):
+Printer = Callable[[str], None]
+LogFn = Callable[..., None]
+
+
+def _getattribs(log: LogFn, node, nodename: str, attrs: dict[str, bool]) -> Iterable[str]:
     if node.tag != nodename:
         raise Exception(f'tag = {node.tag}, but {nodename} expected')
 
-    d = {k:None for k in attrs}
+    d = dict.fromkeys(attrs)
 
-    for k,v in node.attrib.items():
+    for k, v in node.attrib.items():
         if k not in d:
             raise Exception(f'{node.tag}: unknown {k}')
         d[k] = v
 
     # check that all mandatory attributes are extracted
-    for k,v in attrs.items():
+    for k, v in attrs.items():
         if v and d[k] is None:
             raise Exception(f'{node.tag}: {k} is missing')
 
@@ -65,13 +71,13 @@ def _getattribs(log, node, nodename, attrs):
     return d.values()
 
 
-def _parse_deadkeys(log, dead_key_table, deadkeys):
-    accent, name = _getattribs(log, dead_key_table, 'DeadKeyTable', {'Accent': True, 'Name': False})
+def _parse_deadkeys(log: LogFn, dead_key_table, deadkeys: dict[tuple[str, str], DeadKey]) -> int:
+    accent, _name = _getattribs(log, dead_key_table, 'DeadKeyTable', {'Accent': True, 'Name': False})
     for result in dead_key_table:
         text, with_ = _getattribs(log, result, 'Result', {'Text': False, 'With': True})
         deadkey = DeadKey(accent=accent, with_=with_, text=text,
-                          codepoint=text and ord(text) or 0,
-                          deadkeys=None if text else dict())
+                          codepoint=(text and ord(text)) or 0,
+                          deadkeys=None if text else {})
         k = (accent, with_)
         assert k is not deadkeys
         deadkeys[k] = deadkey
@@ -81,7 +87,8 @@ def _parse_deadkeys(log, dead_key_table, deadkeys):
             _parse_deadkeys(log, result[0], deadkey.deadkeys)
     return accent
 
-def verbose_print(*args):
+
+def verbose_print(*args: Any) -> None:
     print(*args, file=sys.stderr)
 
 
@@ -103,11 +110,12 @@ _merge_numlock_capital = (
     ('VK_NUMLOCK', 'VK_CAPITAL', 'VK_CAPITAL VK_NUMLOCK'),
 )
 
-def parse_xml_layout(filename, log=verbose_print):
+
+def parse_xml_layout(filename: str, log: LogFn = verbose_print) -> KeyLayout:
     # VK_MENU = Alt
     # VK_CAPITAL = CapsLock
     # VK_CONTROL + VK_MENU = AltGr
-    keymaps = {k:[None]*256 for k in (
+    keymaps = {k: [None] * 256 for k in (
         '',
         'VK_SHIFT',
         'VK_SHIFT VK_CONTROL',
@@ -133,11 +141,13 @@ def parse_xml_layout(filename, log=verbose_print):
     )}
     extra_scancodes = {}
 
-    root = ElementTree.parse(filename).getroot()
-    alt_right_is_altgr = True if root.attrib['RightAltIsAltGr'] == 'true' else False
-    klid, locale_name, display_name = _getattribs(log, root[0], 'metadata', {'KLID': True,
-                                                                             'LocaleName': True,
-                                                                             'LayoutDisplayName': True})
+    root = ET.parse(filename).getroot()
+    alt_right_is_altgr = root.attrib['RightAltIsAltGr'] == 'true'
+    klid, locale_name, display_name = _getattribs(log, root[0], 'metadata',
+                                                  {'KLID': True,
+                                                   'LocaleName': True,
+                                                   'LayoutDisplayName': True,
+                                                   })
     right_ctrl_like_oem8 = False
     has_oem8_key = False
     for pk in root[1]:
@@ -149,18 +159,18 @@ def parse_xml_layout(filename, log=verbose_print):
 
         assert sc & 0xff
         # assert (sc & 0xff) <= 0x7f
-        assert (sc >> 8) in (0, 0xE0, 0xE1)
+        assert (sc >> 8) in {0, 0xE0, 0xE1}
 
         # Pause
         if sc > 0xE100:
             assert sc == 0xE11D
-            extra_scancodes[sc] = Key(scancode=sc, codepoint=0, text='', vk=vk, deadkeys=dict())
+            extra_scancodes[sc] = Key(scancode=sc, codepoint=0, text='', vk=vk, deadkeys={})
             continue
 
         if not pk and vk == 'VK_OEM_8':
             # assume that VK_OEM_8 is set after dead keys
             assert has_oem8_key
-            assert sc == 0xE01D # right ctrl
+            assert sc == 0xE01D  # right ctrl
             right_ctrl_like_oem8 = sc
 
         sc = (sc & 0x7f) | (0x80 if sc >> 8 else 0)
@@ -168,14 +178,15 @@ def parse_xml_layout(filename, log=verbose_print):
         if not pk:
             keys = keymaps['']
             assert sc not in keys
-            keys[sc] = Key(scancode=sc, codepoint=0, text='', vk=vk, deadkeys=dict())
+            keys[sc] = Key(scancode=sc, codepoint=0, text='', vk=vk, deadkeys={})
             continue
 
         for result in pk:
-            text, codepoint, vk, with_ = _getattribs(log, result, 'Result', {'Text': False,
-                                                                             'TextCodepoints': False,
-                                                                             'VK': False,
-                                                                             'With': False})
+            text, codepoint, vk, with_ = _getattribs(log, result, 'Result',
+                                                     {'Text': False,
+                                                      'TextCodepoints': False,
+                                                      'VK': False,
+                                                      'With': False})
             keys = keymaps[with_ or '']
 
             if with_ and ('VK_OEM_8' in with_):
@@ -189,26 +200,27 @@ def parse_xml_layout(filename, log=verbose_print):
                 if codepoint:
                     assert not text
                     codepoint = int(codepoint, 16)
-                    text = codepoint.to_bytes((codepoint.bit_length() + 7) // 8, byteorder='big'
-                                              ).decode('utf8')
+                    text = codepoint.to_bytes(
+                        (codepoint.bit_length() + 7) // 8,
+                        byteorder='big',
+                    ).decode('utf8')
                 elif len(text) == 1:
                     codepoint = ord(text)
                 else:
                     # multi char
                     codepoint = 0
 
-                keys[sc] = Key(scancode=sc, codepoint=codepoint, text=text, vk=vk, deadkeys=dict())
+                keys[sc] = Key(scancode=sc, codepoint=codepoint, text=text, vk=vk, deadkeys={})
 
             # dead keys
             elif len(result):
                 assert not vk
                 assert len(result) == 1
-                deadkeys = dict()
+                deadkeys = {}
                 accent = _parse_deadkeys(log, result[0], deadkeys)
                 assert len(accent) == 1
                 assert deadkeys
                 keys[sc] = Key(scancode=sc, codepoint=ord(accent), text=accent, vk=vk, deadkeys=deadkeys)
-
 
     # new keymap: shiftlock + numlock
     for num_mod, caps_mod, final_mod in _merge_numlock_capital:
@@ -238,8 +250,9 @@ def parse_xml_layout(filename, log=verbose_print):
                      display_name, keymaps, extra_scancodes,
                      alt_right_is_altgr, right_ctrl_like_oem8)
 
-def _accu_scancodes(strings:list[str], map:list[Key]):
-    for i,k in enumerate(map):
+
+def _accu_scancodes(strings: list[str], kmap: list[Key]) -> None:
+    for i, k in enumerate(kmap):
         if k:
             text = k.text
             if k.codepoint < 32:
@@ -260,24 +273,26 @@ def _accu_scancodes(strings:list[str], map:list[Key]):
         else:
             strings.append(f"  0x{i:02X} -\n")
 
-def print_layout(layout:KeyLayout, printer=sys.stdout.write):
+
+def print_layout(layout: KeyLayout, printer: Printer = sys.stdout.write) -> None:
     strings = [f'KLID: {layout.klid}\nLocalName: {layout.locale_name}\nDisplayName: {layout.display_name}\nRightAltIsAltGr: {layout.alt_right_is_altgr}\nRightCtrlIsOEM8: {layout.has_right_ctrl_like_oem8}\n']
 
-    for mapname,map in layout.keymaps.items():
+    for mapname, kmap in layout.keymaps.items():
         strings.append(f'{mapname or "normal"} (0x00)\n')
-        _accu_scancodes(strings, map)
+        _accu_scancodes(strings, kmap)
 
     strings.append('extra:\n')
-    for i,k in layout.extra_scancodes.items():
+    for i, k in layout.extra_scancodes.items():
         strings.append(f"  0x{i:04X} Key(vk='{k.vk}')\n")
 
     printer(''.join(strings))
 
 
-def null_fn(*args):
+def null_fn(*args) -> None:  # noqa: ANN002
     pass
 
-def parse_argv(argv:Optional[list] = None, printer=sys.stdout.write) -> list[KeyLayout]:
+
+def parse_argv(argv: list[str] | None = None, printer: Printer = sys.stdout.write) -> list[KeyLayout]:
     argv = argv if argv is not None else sys.argv
     log = null_fn
     iargv = 1
@@ -288,9 +303,9 @@ def parse_argv(argv:Optional[list] = None, printer=sys.stdout.write) -> list[Key
 
     if len(argv) == iargv:
         print(argv[0], '[-v] layout.xml...', file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
-    layouts:list[KeyLayout] = []
+    layouts: list[KeyLayout] = []
     for filename in argv[iargv:]:
         log('filename:', filename)
         layout = parse_xml_layout(filename, log)
